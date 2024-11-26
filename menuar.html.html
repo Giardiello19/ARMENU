@@ -1,0 +1,130 @@
+<html><head><base href="/" />
+<title>Visor AR de modelos 3D GLB</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script type="module" src="https://unpkg.com/@google/model-viewer@3.3.0/dist/model-viewer.min.js"></script>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #f0f0f0;
+    font-family: Arial, sans-serif;
+  }
+
+  .container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  model-viewer {
+    width: 100%;
+    height: 80vh;
+    background-color: #ffffff;
+  }
+
+  .buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+  }
+
+  button {
+    padding: 12px 24px;
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s ease;
+  }
+
+  button:hover {
+    background: #1976D2;
+  }
+
+  #file-input {
+    display: none;
+  }
+
+  .ar-info {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+
+  .ar-button {
+    animation: pulse 2s infinite;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <model-viewer 
+    camera-controls
+    auto-rotate
+    ar
+    ar-modes="webxr scene-viewer quick-look"
+    id="viewer"
+    src="https://modelviewer.dev/shared-assets/models/astronaut.glb"
+    alt="Un modelo 3D en AR"
+    ar-status="not-presenting">
+  </model-viewer>
+
+  <div class="buttons">
+    <input type="file" id="file-input" accept=".glb,.gltf">
+    <button onclick="document.getElementById('file-input').click()">Cargar Modelo GLB</button>
+    <button slot="ar-button" class="ar-button">Ver en AR</button>
+  </div>
+
+  <div class="ar-info">
+    Utiliza tu cámara para colocar el modelo en el mundo real
+  </div>
+</div>
+
+<script>
+document.getElementById('file-input').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (file) {
+    const viewer = document.getElementById('viewer');
+    const url = URL.createObjectURL(file);
+    viewer.src = url;
+  }
+});
+
+// Detectar si AR está disponible
+const modelViewer = document.querySelector('model-viewer');
+modelViewer.addEventListener('ar-status', (event) => {
+  if (event.detail.status === 'failed') {
+    const arButton = document.querySelector('.ar-button');
+    arButton.style.display = 'none';
+    const arInfo = document.querySelector('.ar-info');
+    arInfo.textContent = 'AR no está disponible en este dispositivo';
+  }
+});
+
+// Manejar errores de carga
+modelViewer.addEventListener('error', (error) => {
+  console.error('Error cargando el modelo:', error);
+  alert('Error al cargar el modelo 3D. Por favor, intenta con otro archivo.');
+});
+</script>
+</body></html>
